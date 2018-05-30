@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+Register
+<form id="register" method="post" action="/register">
+  <input type="text" id="loginreg" name="loginreg" placeholder="login" required >
+  <input type="text" id="emailreg" name="emailreg" placeholder="email" required >
+  <input type="password" id="passwordreg" name="passwordreg" placeholder="password" required>
+  <input type="submit" value="zarejestruj">
+</form>
+{% endblock %}

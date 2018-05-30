@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block style %}
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+Hi, {{username}} your balance: {{balance}}<br>
+New transaction:
+<form id="transaction" method="post">
+  <input type="text" id="adress" name="adress" placeholder="Where to adress" required>
+  <input type="number" id="amount" name="amount" placeholder="amount" required>
+  <input type="submit" value="Send">
+</form>
+<br><br>
+Mine blocks:
+<form method="post" id="mineCheckbox">
+  <label class="switch">
+    <input type="checkbox" id="mine" name="mine" onclick="handleBlock()">
+    <span class="slider round"></span>
+  </label>
+</form>
+<script src="{{ url_for('static', filename='sha256.min.js') }}"></script>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script>
+
+function handleBlock() {
+  console.log(document.getElementById('mine').checked);
+  if(document.getElementById('mine').checked) {
+    mineBlock().then(function(response) {
+      var newBlock = JSON.parse(response);
+      var hashed = "";
+      var difficulty = "";
+      for(let i=0; i<newBlock.difficulty; i++) {
+        difficulty += "0";
+      }
+      console.log(typeof(newBlock))
+      while(hashed.substring(0, newBlock.difficulty) != difficulty) {
+        newBlock.nonce += 1;
+        var strToHash = newBlock.previusHash + newBlock.date + newBlock.transactions + newBlock.nonce;
+        console.log(strToHash);
+        hashed = sha256(strToHash);
+      }
+      newBlock.hash = hashed;
+      var xhr2 = new XMLHttpRequest();
+      xhr2.open("POST", "/sendblock", true);
+      xhr2.setRequestHeader("Content-Type", "application/json");
+      xhr2.onreadystatechange = function () {
+        if (xhr2.readyState === 4 && xhr2.status === 200) {
+            console.log(xhr2.responseText);
+        }
+      };
+      xhr2.send(JSON.stringify(newBlock));
+      console.log(JSON.stringify(newBlock));
+      handleBlock();
+    }).catch(function(error) {
+        console.log("ERRORRRRR");
+        console.log(error);
+        setTimeout(handleBlock, 5000);
+    });
+  }
+}
+
+function mineBlock() {
+    return new Promise(function(resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/getblock", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+          if(xhr.status == 200)
+            resolve(xhr.responseText)
+          else
+            reject(xhr.status)
+        }
+      };
+      xhr.send();
+    });
+}
+
+</script>
+
+{% endblock %}
