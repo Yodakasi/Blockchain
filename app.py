@@ -2,7 +2,6 @@ from flask import *
 from flask_mysqldb import MySQL
 import hashlib
 import random
-from pprint import pprint
 from blockchain import block, blockChain
 import os
 import threading
@@ -19,7 +18,6 @@ mysql.app.config['MYSQL_PASSWORD'] = 'toor'
 mysql.app.config['MYSQL_DB'] = 'dupcoin'
 mysql.app.config['MYSQL_HOST'] = 'localhost'
 
-print("Initialization:")
 actualBlockChain = blockChain(4)
 
 def checkChainValidity():
@@ -27,7 +25,6 @@ def checkChainValidity():
         return True
     else:
         actualBlockChain.chainReset()
-        print("wyjebalem chujkow")
         return False
 
 def setInterval(func, sec):
@@ -66,11 +63,9 @@ def login():
                 session['user'] = login
                 return redirect(url_for('user'))
             else:
-                message = "Złe hasło lub login <a href='/'>wróć</a>"
+                message = "Bad login or password <a href='/'>wróć</a>"
         except:
-            message = "Chuja tam <a href='/'>wróć</a>"
-            print(login)
-            print(password)
+            message = "Server error <a href='/'>wróć</a>"
         return render_template_string(message)
     else:
         return render_template('login.html')
@@ -87,13 +82,13 @@ def register():
             cur.execute('''SELECT * FROM `users` WHERE login=%s''', (login))
             elo = len(str(cur.fetchall()))
             if elo > 2:
-                message = "login zajeety <a href='/'>wróć</a>"
+                message = "login taken <a href='/'>wróć</a>"
             else:
                 cur.execute('''INSERT INTO `users` (`id`, `login`, `email`, `password`) VALUES (NULL, %s, %s, %s)''', (login, email, password))
                 conn.commit()
-                message = "Rejetracja powiodla sie <a href='/'>wróć</a>"
+                message = "Registration successful <a href='/'>wróć</a>"
         except:
-            message = "Rejetracja nie powiodla sie <a href='/'>wróć</a>"
+            message = "Registration not successful <a href='/'>wróć</a>"
         return render_template_string(message)
     else:
         return render_template('register.html')
@@ -103,8 +98,6 @@ def user():
     if 'user' in session:
         user = session['user']
         balance1 = actualBlockChain.getAdressBalance(user)
-        print(actualBlockChain.chain[-1].__dict__)
-        print(actualBlockChain.validateChain())
         if request.form.get('adress'):
             amount = int(request.form.get('amount'))
             if int(actualBlockChain.getAdressBalance(user)) > amount and amount > 0 and request.form.get('adress') != user:

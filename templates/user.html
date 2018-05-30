@@ -82,7 +82,6 @@ Mine blocks:
 <script>
 
 function handleBlock() {
-  console.log(document.getElementById('mine').checked);
   if(document.getElementById('mine').checked) {
     mineBlock().then(function(response) {
       var newBlock = JSON.parse(response);
@@ -91,11 +90,9 @@ function handleBlock() {
       for(let i=0; i<newBlock.difficulty; i++) {
         difficulty += "0";
       }
-      console.log(typeof(newBlock))
       while(hashed.substring(0, newBlock.difficulty) != difficulty) {
         newBlock.nonce += 1;
         var strToHash = newBlock.previusHash + newBlock.date + newBlock.transactions + newBlock.nonce;
-        console.log(strToHash);
         hashed = sha256(strToHash);
       }
       newBlock.hash = hashed;
@@ -108,11 +105,8 @@ function handleBlock() {
         }
       };
       xhr2.send(JSON.stringify(newBlock));
-      console.log(JSON.stringify(newBlock));
       handleBlock();
     }).catch(function(error) {
-        console.log("ERRORRRRR");
-        console.log(error);
         setTimeout(handleBlock, 5000);
     });
   }
