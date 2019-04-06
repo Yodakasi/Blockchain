@@ -118,16 +118,16 @@ class blockChain:
 def main():
     print("Initialization:")
     m = blockChain(2)
-    m.newTransaction('llll', 'sdfsdf', 150)
-    m.newTransaction('llll', 'sdfsdf', 50)
-    m.mineBlock('dupsko')
+    m.newTransaction('llll', 'Bob', 150)
+    m.newTransaction('llll', 'Bob', 50)
+    m.mineBlock('Jon')
     print(m.chain[-1].transactions.fromAdress)
-    m.newTransaction('sdfsdf', 'llll', 100)
-    m.mineBlock('dupsko')
-    m.mineBlock('lol')
-    m.mineBlock('dupsko')
+    m.newTransaction('Bob', 'llll', 100)
+    m.mineBlock('Jon')
+    m.mineBlock('Harry')
+    m.mineBlock('Jon')
     print(len(m.transactionsQueue))
-    print(m.getAdressBalance('dupsko'))
+    print(m.getAdressBalance('Jon'))
 
 
 if __name__ == "__main__":
